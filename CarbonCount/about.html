@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | CarbonCount™</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <link rel="stylesheet" href="styles/main.css">
+
+    <style>
+        /* Mission Grid */
+        .mission-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 6rem;
+        }
+
+        .mission-card {
+            padding: 2.5rem;
+            text-align: left;
+            transition: transform 0.3s;
+        }
+
+        .mission-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 255, 163, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--clr-primary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto 6rem;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--clr-primary), transparent);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 3rem;
+            padding-left: 2rem;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -2.6rem;
+            /* Adjust based on padding */
+            top: 0;
+            width: 16px;
+            height: 16px;
+            background: var(--clr-bg-dark);
+            border: 2px solid var(--clr-primary);
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        /* Trust Bar */
+        .trust-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            opacity: 0.5;
+            padding: 2rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 4rem;
+        }
+
+        .trust-logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+
+<body style="padding-top: 80px;">
+
+    <!-- Standardized Fixed Navbar -->
+    <nav class="glass-nav"
+        style="position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; backdrop-filter: blur(12px); background: rgba(10, 10, 10, 0.6); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+        <div class="nav-container"
+            style="max-width: 1400px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div class="logo" onclick="location.href='index.html'"
+                style="cursor: pointer; display: flex; align-items: center; gap: 0.8rem; font-family: var(--font-heading); font-size: 1.5rem; letter-spacing: 1px; font-weight: 700; color: white;">
+                <img src="assets/logo.png" alt="CarbonCount" style="height: 32px; width: auto;">
+                CarbonCount
+            </div>
+            <div class="nav-links" style="display: flex; gap: 30px; align-items: center;">
+                <a href="index.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">Home</a>
+                <a href="calculator.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">Calculator</a>
+                <a href="pricing.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">Pricing</a>
+                <a href="about.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">About</a>
+                <a href="contact.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">Contact</a>
+            </div>
+            <div class="nav-cta" style="display: flex; gap: 1rem; align-items: center;">
+                <button class="btn-primary" onclick="location.href='login.html'"
+                    style="border-radius: 50px; padding: 0.6rem 1.5rem; font-size: 0.9rem;">Get Started</button>
+            </div>
+            <!-- Hamburger Icon -->
+            <button class="hamburger-btn" onclick="toggleMobileMenu()">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-overlay" class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
+    <!-- Mobile Slide-out Menu -->
+    <div id="mobile-menu" class="mobile-menu">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <span style="font-weight: 700; font-size: 1.2rem;">Menu</span>
+            <i data-lucide="x" onclick="toggleMobileMenu()" style="cursor: pointer;"></i>
+        </div>
+        <a href="index.html">Home</a>
+        <a href="calculator.html">Calculator</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <button class="btn-primary" onclick="location.href='login.html'" style="margin-top: auto; width: 100%;">Get
+            Started</button>
+    </div>
+
+    <!-- Hero Canvas -->
+    <div id="hero-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;"></div>
+
+    <main style="max-width: 1000px; margin: 0 auto; padding: 6rem 2rem;">
+
+        <section class="glass-panel" style="text-align: center; margin-bottom: 6rem; padding: 3rem;">
+            <h1 style="font-size: 3.5rem; margin-bottom: 1.5rem;">Decarbonizing Global Trade.</h1>
+            <p style="color: var(--clr-text-muted); font-size: 1.25rem;">
+                We are building the digital infrastructure for a sustainable future, starting with the European Union's
+                Carbon Border Adjustment Mechanism (CBAM).
+            </p>
+        </section>
+
+        <!-- New Mission Grid -->
+        <div class="mission-grid">
+            <div class="glass-panel mission-card">
+                <div class="icon-box"><i data-lucide="zap"></i></div>
+                <h3 style="margin-bottom: 0.5rem;">Real-time Speed</h3>
+                <p style="color: var(--clr-text-muted); font-size: 0.9rem;">Instant CO2e calculations powered by our
+                    proprietary physics engine.</p>
+            </div>
+            <div class="glass-panel mission-card">
+                <div class="icon-box"><i data-lucide="shield-check"></i></div>
+                <h3 style="margin-bottom: 0.5rem;">Data Privacy</h3>
+                <p style="color: var(--clr-text-muted); font-size: 0.9rem;">Your supply chain data is secured in AES-256
+                    encrypted vaults.</p>
+            </div>
+            <div class="glass-panel mission-card">
+                <div class="icon-box"><i data-lucide="award"></i></div>
+                <h3 style="margin-bottom: 0.5rem;">EU Compliant</h3>
+                <p style="color: var(--clr-text-muted); font-size: 0.9rem;">100% aligned with the latest EU Transition
+                    Phase reporting protocols.</p>
+            </div>
+        </div>
+
+        <!-- Founder Section -->
+        <div class="glass-panel"
+            style="padding: 3rem; display: flex; align-items: center; gap: 3rem; margin-bottom: 6rem;">
+            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80"
+                alt="Chauhan Shubham"
+                style="width: 200px; height: 200px; object-fit: cover; border-radius: var(--radius-lg); filter: grayscale(100%); transition: filter 0.3s; border: 2px solid var(--clr-primary);">
+
+            <div>
+                <h2 style="font-size: 2rem; margin-bottom: 0.5rem;">Chauhan Shubham</h2>
+                <p style="color: var(--clr-primary); font-weight: 600; margin-bottom: 1rem;">Founder & CEO</p>
+                <p style="color: var(--clr-text-muted); margin-bottom: 1.5rem;">
+                    Engineer in Electronics & Software. Passionate about leveraging technology to solve complex
+                    regulatory challenges in international logistics.
+                </p>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="#" style="color: var(--clr-text-main);"><i data-lucide="linkedin"></i></a>
+                    <a href="#" style="color: var(--clr-text-main);"><i data-lucide="twitter"></i></a>
+                    <a href="#" style="color: var(--clr-text-main);"><i data-lucide="mail"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Journey Timeline -->
+        <div class="timeline">
+            <h3 style="position: absolute; left: -100px; top: -50px; color: var(--clr-text-muted);">Our Journey</h3>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <h4 style="color: var(--clr-primary); margin-bottom: 0.25rem;">2023</h4>
+                <p style="font-weight: 600; margin-bottom: 0.5rem;">The Concept</p>
+                <p style="color: var(--clr-text-muted); font-size: 0.9rem;">CarbonCount born out of the need to simplify
+                    complex EU regulations.</p>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <h4 style="color: var(--clr-primary); margin-bottom: 0.25rem;">2024</h4>
+                <p style="font-weight: 600; margin-bottom: 0.5rem;">Beta Launch</p>
+                <p style="color: var(--clr-text-muted); font-size: 0.9rem;">Released core algorithm for Steel and
+                    Aluminum importers.</p>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <h4 style="color: var(--clr-primary); margin-bottom: 0.25rem;">2025</h4>
+                <p style="font-weight: 600; margin-bottom: 0.5rem;">Global Standard</p>
+                <p style="color: var(--clr-text-muted); font-size: 0.9rem;">Scaling to support all 6 CBAM sectors and
+                    API integrations.</p>
+            </div>
+        </div>
+
+        <!-- Trust Bar -->
+        <div class="trust-bar">
+            <div class="trust-logo"><i data-lucide="globe"></i> GHG Protocol</div>
+            <div class="trust-logo"><i data-lucide="check-circle"></i> ISO 14064</div>
+            <div class="trust-logo"><i data-lucide="flag"></i> EU Commission</div>
+        </div>
+
+    </main>
+
+    <footer class="premium-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="assets/logo.png" alt="CarbonCount" style="height: 35px;">
+                    <p>The enterprise-grade compliance platform for CBAM reporting and industrial decarbonization.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="calculator.html">Calculator</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="about.html">Methodology</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Status</a></li>
+                        <li><a href="#">CBAM Guide</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="contact.html">Support</a></li>
+                        <li><a href="#">Sales</a></li>
+                        <li><a href="#">LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 CarbonCount. All rights reserved.</p>
+                <div style="display: flex; gap: 2rem;">
+                    <a href="#" style="color: inherit; text-decoration: none;">Privacy Policy</a>
+                    <a href="#" style="color: inherit; text-decoration: none;">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="scripts/hero-animation.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+    <script src="scripts/mobile.js"></script>
+</body>
+
+</html>

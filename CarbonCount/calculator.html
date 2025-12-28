@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBAM Calculator | CarbonCount™</title>
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Client-side PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mode-toggle {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .toggle-btn {
+            background: transparent;
+            color: var(--clr-text-muted);
+            border: 1px solid var(--clr-border);
+            padding: 0.5rem 2rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .toggle-btn.active {
+            background: var(--clr-primary);
+            color: #000;
+            border-color: var(--clr-primary);
+            font-weight: 600;
+        }
+
+        .toggle-btn:first-child {
+            border-radius: 50px 0 0 50px;
+        }
+
+        .toggle-btn:last-child {
+            border-radius: 0 50px 50px 0;
+        }
+
+        .toggle-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .image-card {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            border-radius: var(--radius-lg);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .image-card:hover {
+            transform: scale(1.02);
+        }
+
+        .image-card.selected {
+            border-color: var(--clr-primary);
+            box-shadow: 0 0 20px var(--clr-primary-glow);
+        }
+
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+        }
+
+        /* Split View Layout */
+        .split-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            height: 500px;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+            border-radius: var(--radius-lg);
+            z-index: 10;
+        }
+
+        .progress-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(var(--clr-primary) 0%, transparent 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            position: relative;
+        }
+
+        .progress-inner {
+            width: 180px;
+            height: 180px;
+            background: #17202a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body style="padding-top: 100px;">
+
+    <!-- Standardized Fixed Navbar with Mobile -->
+    <nav class="glass-nav">
+        <div class="nav-container"
+            style="max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div class="logo" onclick="location.href='index.html'"
+                style="cursor: pointer; display: flex; align-items: center; gap: 0.8rem; font-family: var(--font-heading); font-weight: 800; font-size: 1.4rem; color: #fff;">
+                <img src="assets/logo.png" alt="CarbonCount" style="height: 30px; width: auto;">
+                CarbonCount
+            </div>
+            <div class="nav-links" style="display: flex; gap: 2.5rem; align-items: center;">
+                <a href="index.html" class="nav-link-standard">Home</a>
+                <a href="calculator.html" class="nav-link-standard active">Calculator</a>
+                <a href="pricing.html" class="nav-link-standard">Pricing</a>
+                <a href="about.html" class="nav-link-standard">About</a>
+                <a href="contact.html" class="nav-link-standard">Contact</a>
+            </div>
+            <div class="nav-cta">
+                <button class="btn-primary" onclick="location.href='login.html'"
+                    style="padding: 0.6rem 1.5rem; font-size: 0.85rem;">Dashboard</button>
+            </div>
+            <button class="hamburger-btn" onclick="toggleMobileMenu()">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-overlay" class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
+    <!-- Mobile Slide-out Menu -->
+    <div id="mobile-menu" class="mobile-menu">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <span style="font-weight: 700; font-size: 1.2rem;">Menu</span>
+            <i data-lucide="x" onclick="toggleMobileMenu()" style="cursor: pointer;"></i>
+        </div>
+        <a href="index.html">Home</a>
+        <a href="calculator.html">Calculator</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <button class="btn-primary" onclick="location.href='login.html'" style="margin-top: auto; width: 100%;">Get
+            Started</button>
+    </div>
+
+    <main style="max-width: 1000px; margin: 0 auto; padding: 2rem;">
+
+        <!-- Control Tabs -->
+        <div class="mode-toggle">
+            <button class="toggle-btn active">Calculator</button>
+            <button class="toggle-btn disabled" title="Login to access history">History</button>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container" style="max-width: 600px; margin: 0 auto 2rem;">
+            <div class="progress-bar" style="height: 4px; background: var(--clr-border); border-radius: 2px;">
+                <div class="progress-fill" id="progress-fill"
+                    style="height: 100%; background: var(--clr-primary); width: 20%; transition: width 0.4s ease;">
+                </div>
+            </div>
+            <div
+                style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.8rem; color: var(--clr-text-muted);">
+                <span>Role</span><span>Company</span><span>Goods</span><span>Location</span><span>Result</span>
+            </div>
+        </div>
+
+        <div id="calculator-wizard" class="glass-panel" style="padding: 2rem; min-height: 600px;">
+            <form id="calc-form">
+
+                <!-- Step 1: Role Selection -->
+                <div class="step active" id="step-1">
+                    <h2 style="margin-bottom: 2rem; text-align: center;">Identity Selection</h2>
+                    <div class="role-grid" id="role-container"
+                        style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                        <div class="role-card glass-panel animate-fade-in" data-role="exporter">
+                            <div class="role-icon-box"><i data-lucide="ship"></i></div>
+                            <h3>Exporter</h3>
+                            <p>Shipping Goods to EU</p>
+                        </div>
+                        <div class="role-card glass-panel animate-fade-in" data-role="manufacturer"
+                            style="animation-delay: 0.1s;">
+                            <div class="role-icon-box"><i data-lucide="factory"></i></div>
+                            <h3>Manufacturer</h3>
+                            <p>Production Facility</p>
+                        </div>
+                        <div class="role-card glass-panel animate-fade-in" data-role="importer"
+                            style="animation-delay: 0.2s;">
+                            <div class="role-icon-box"><i data-lucide="building-2"></i></div>
+                            <h3>EU Importer</h3>
+                            <p>Declarant Entity</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Company Info -->
+                <div class="step" id="step-2">
+                    <h2 style="margin-bottom: 2rem;">Company Details</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                        <div class="input-group">
+                            <label class="input-label">Company Name</label>
+                            <input type="text" id="company-name" class="input-dark" placeholder="Legal Entity Name">
+                        </div>
+                        <div class="input-group">
+                            <label id="id-label" class="input-label">Company ID</label>
+                            <input type="text" id="company-id" class="input-dark" placeholder="e.g. VAT / GSTIN">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Start Date</label>
+                            <input type="date" id="start-date" class="input-dark">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">End Date</label>
+                            <input type="date" id="end-date" class="input-dark">
+                        </div>
+                    </div>
+                    <div style="margin-top: 2rem; display: flex; justify-content: space-between;">
+                        <button type="button" class="btn-secondary" id="btn-back-2">Back</button>
+                        <button type="button" class="btn-primary" id="btn-next-2">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Goods Details (Multi-Row) -->
+                <div class="step" id="step-3">
+                    <h2 style="margin-bottom: 2rem;">Product Details</h2>
+
+                    <!-- Data Entry Mode Switch -->
+                    <div class="mode-toggle-container">
+                        <button type="button" id="mode-manual" class="entry-mode-btn active">
+                            <i data-lucide="keyboard" style="width: 18px;"></i> Manual Entry
+                        </button>
+                        <button type="button" id="mode-auto" class="entry-mode-btn">
+                            <i data-lucide="file-up" style="width: 18px;"></i> Smart Upload (AI)
+                        </button>
+                    </div>
+
+                    <div id="manual-entry-section">
+                        <div class="form-group">
+                            <label class="input-label" style="margin-bottom: 1rem;">Goods Category & HS Codes</label>
+                            <div id="goods-container">
+                                <!-- Rows inserted via JS -->
+                            </div>
+
+                            <button type="button" id="btn-add-product"
+                                style="background: transparent; border: 1px dashed var(--clr-primary); color: var(--clr-primary); padding: 0.75rem; width: 100%; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.9rem;">
+                                <i data-lucide="plus-circle" style="width: 18px;"></i> Add Another Product
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="auto-upload-section" style="display: none;">
+                        <div class="glass-panel animate-fade-in"
+                            style="padding: 2.5rem; text-align: center; border-style: dashed; border-width: 2px; background: rgba(0,255,163,0.01);">
+                            <div
+                                style="width: 64px; height: 64px; background: rgba(0, 255, 163, 0.1); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--clr-primary);">
+                                <i data-lucide="brain-circuit" style="width: 32px; height: 32px;"></i>
+                            </div>
+                            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">AI Smart Extraction</h3>
+                            <p
+                                style="color: var(--clr-text-muted); font-size: 0.9rem; margin-bottom: 2rem; max-width: 400px; margin-left: auto; margin-right: auto;">
+                                Paste your invoice data below. Our neural engine will automatically identify categories,
+                                HS codes, and weights.
+                            </p>
+
+                            <textarea id="ai-invoice-text" class="input-dark"
+                                style="height: 140px; margin-bottom: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding: 1.25rem;"
+                                placeholder="e.g. 150 tonnes of Cold Rolled Steel (CN 7209)..."></textarea>
+
+                            <div style="display: flex; gap: 1rem; justify-content: center;">
+                                <button type="button" class="btn-primary" id="btn-ai-extract"
+                                    style="padding: 0.8rem 1.8rem;">
+                                    <i data-lucide="sparkles" style="width: 18px; margin-right: 8px;"></i> Run AI
+                                    Extraction
+                                </button>
+                                <button type="button" class="btn-secondary"
+                                    onclick="document.getElementById('file-upload-input').click()"
+                                    style="padding: 0.8rem 1.8rem;">
+                                    <i data-lucide="file-text" style="width: 18px; margin-right: 8px;"></i> Upload
+                                    Document
+                                </button>
+                            </div>
+                            <div id="extraction-progress" style="display: none; margin-top: 2rem;">
+                                <div
+                                    style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--clr-primary); margin-bottom: 0.5rem; font-weight: 600;">
+                                    <span id="extraction-status">Initializing Analysis...</span>
+                                    <span id="extraction-percent">0%</span>
+                                </div>
+                                <div
+                                    style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden;">
+                                    <div id="extraction-bar"
+                                        style="width: 0%; height: 100%; background: linear-gradient(to right, var(--clr-primary), var(--clr-accent)); transition: width 0.4s ease;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <input type="file" id="file-upload-input" style="display: none;">
+                            <div
+                                style="margin-top: 1.5rem; font-size: 0.7rem; color: var(--clr-text-muted); letter-spacing: 0.05em; text-transform: uppercase; font-weight: 700;">
+                                Powered by DeepSeek-R1 Architecture
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 2rem; display: flex; justify-content: space-between;">
+                        <button type="button" class="btn-secondary" id="btn-back-3">Back</button>
+                        <button type="button" class="btn-primary" id="btn-next-3">Next Step</button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Supply Chain & Transport -->
+                <div class="step" id="step-4">
+                    <h2 style="margin-bottom: 2rem;">Logistics Intelligence</h2>
+                    <div class="form-group" style="margin-bottom: 2.5rem;">
+                        <label class="input-label">Transport Mode</label>
+                        <div class="transport-grid" id="transport-container"
+                            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                            <div class="transport-card transport-option glass-panel selected" data-mode="sea">
+                                <i data-lucide="ship"></i>
+                                <span>Sea Freight</span>
+                            </div>
+                            <div class="transport-card transport-option glass-panel" data-mode="air">
+                                <i data-lucide="plane"></i>
+                                <span>Air Cargo</span>
+                            </div>
+                            <div class="transport-card transport-option glass-panel" data-mode="road">
+                                <i data-lucide="truck"></i>
+                                <span>Road/Rail</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                        <div class="input-group">
+                            <label class="input-label">Origin Country</label>
+                            <select id="origin-select" class="input-dark">
+                                <option value="">Select Origin...</option>
+                                <optgroup label="Europe">
+                                    <option value="DE" data-lat="51.1657" data-lng="10.4515">Germany</option>
+                                    <option value="FR" data-lat="46.2276" data-lng="2.2137">France</option>
+                                    <option value="IT" data-lat="41.8719" data-lng="12.5674">Italy</option>
+                                    <option value="ES" data-lat="40.4637" data-lng="-3.7492">Spain</option>
+                                    <option value="NL" data-lat="52.1326" data-lng="5.2913">Netherlands</option>
+                                    <option value="BE" data-lat="50.5039" data-lng="4.4699">Belgium</option>
+                                    <option value="PL" data-lat="51.9194" data-lng="19.1451">Poland</option>
+                                    <option value="SE" data-lat="60.1282" data-lng="18.6435">Sweden</option>
+                                    <option value="AT" data-lat="47.5162" data-lng="14.5501">Austria</option>
+                                    <option value="CZ" data-lat="49.8175" data-lng="15.4730">Czech Republic</option>
+                                </optgroup>
+                                <optgroup label="Asia">
+                                    <option value="CN" data-lat="35.8617" data-lng="104.1954">China</option>
+                                    <option value="IN" data-lat="20.5937" data-lng="78.9629">India</option>
+                                    <option value="JP" data-lat="36.2048" data-lng="138.2529">Japan</option>
+                                    <option value="KR" data-lat="35.9078" data-lng="127.7669">South Korea</option>
+                                    <option value="TW" data-lat="23.6978" data-lng="120.9605">Taiwan</option>
+                                    <option value="VN" data-lat="14.0583" data-lng="108.2772">Vietnam</option>
+                                    <option value="TH" data-lat="15.8700" data-lng="100.9925">Thailand</option>
+                                    <option value="MY" data-lat="4.2105" data-lng="101.9758">Malaysia</option>
+                                    <option value="SG" data-lat="1.3521" data-lng="103.8198">Singapore</option>
+                                    <option value="ID" data-lat="-0.7893" data-lng="113.9213">Indonesia</option>
+                                </optgroup>
+                                <optgroup label="Americas">
+                                    <option value="US" data-lat="37.0902" data-lng="-95.7129">United States</option>
+                                    <option value="CA" data-lat="56.1304" data-lng="-106.3468">Canada</option>
+                                    <option value="MX" data-lat="23.6345" data-lng="-102.5528">Mexico</option>
+                                    <option value="BR" data-lat="-14.2350" data-lng="-51.9253">Brazil</option>
+                                    <option value="AR" data-lat="-38.4161" data-lng="-63.6167">Argentina</option>
+                                    <option value="CL" data-lat="-35.6751" data-lng="-71.5430">Chile</option>
+                                </optgroup>
+                                <optgroup label="Middle East & Africa">
+                                    <option value="TR" data-lat="38.9637" data-lng="35.2433">Turkey</option>
+                                    <option value="SA" data-lat="23.8859" data-lng="45.0792">Saudi Arabia</option>
+                                    <option value="AE" data-lat="23.4241" data-lng="53.8478">UAE</option>
+                                    <option value="ZA" data-lat="-30.5595" data-lng="22.9375">South Africa</option>
+                                    <option value="EG" data-lat="26.8206" data-lng="30.8025">Egypt</option>
+                                </optgroup>
+                                <optgroup label="Oceania">
+                                    <option value="AU" data-lat="-25.2744" data-lng="133.7751">Australia</option>
+                                    <option value="NZ" data-lat="-40.9006" data-lng="174.8860">New Zealand</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Target EU Market</label>
+                            <select id="dest-select" class="input-dark">
+                                <option value="">Select Destination...</option>
+                                <option value="germany" data-lat="51.1657" data-lng="10.4515">Germany</option>
+                                <option value="france" data-lat="46.2276" data-lng="2.2137">France</option>
+                                <option value="italy" data-lat="41.8719" data-lng="12.5674">Italy</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="map-wrapper" class="glass-panel"
+                        style="height: 300px; position: relative; margin-top: 1rem;">
+                        <div id="map" style="height: 100%; width: 100%;"></div>
+                        <div id="map-interaction-overlay" class="map-overlay">
+                            <span class="btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.8rem;">Tap to Explore
+                                Route</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 2.5rem; display: flex; justify-content: space-between;">
+                        <button type="button" class="btn-secondary" id="btn-back-4">Back</button>
+                        <button type="button" class="btn-primary" id="btn-calc">Calculate Footprint</button>
+                    </div>
+                </div>
+
+                <!-- Step 5: Result (Premium Dashboard) -->
+                <div class="step" id="step-5">
+                    <div style="text-align: center; margin-bottom: 3rem;">
+                        <h2
+                            style="font-size: 2.2rem; margin-bottom: 0.5rem; background: linear-gradient(to right, #fff, var(--clr-primary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                            Calculation Intelligence</h2>
+                        <p style="color: var(--clr-text-muted); font-size: 0.95rem;">Preliminary CBAM Footprint Analysis
+                        </p>
+                    </div>
+
+                    <div class="result-dashboard"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 3rem;">
+                        <!-- Primary KPI -->
+                        <div class="glass-panel"
+                            style="padding: 2.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                            <div class="progress-circle" id="result-circle"
+                                style="width: 200px; height: 200px; margin-bottom: 0;">
+                                <div class="progress-inner">
+                                    <span style="font-size: 3rem; font-weight: 800; color: #fff;"
+                                        id="emission-val">0</span>
+                                    <span
+                                        style="font-size: 0.8rem; color: var(--clr-text-muted); text-transform: uppercase; letter-spacing: 0.1em;">tCO2e</span>
+                                </div>
+                            </div>
+                            <div id="status-badge"
+                                style="margin-top: 1.5rem; padding: 0.4rem 1.2rem; border-radius: 50px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">
+                                Determining...</div>
+                        </div>
+
+                        <!-- Secondary Stats -->
+                        <div style="display: grid; grid-template-rows: 1fr 1fr; gap: 1rem;">
+                            <div class="glass-panel"
+                                style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                                <div
+                                    style="width: 50px; height: 50px; background: rgba(0, 210, 255, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--clr-accent);">
+                                    <i data-lucide="euro" style="width: 24px;"></i>
+                                </div>
+                                <div>
+                                    <div class="input-label" style="margin-bottom: 0.2rem;">Estimated Liability</div>
+                                    <div style="font-size: 1.5rem; font-weight: 700;" id="liability-val">€0.00</div>
+                                </div>
+                            </div>
+                            <div class="glass-panel"
+                                style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                                <div
+                                    style="width: 50px; height: 50px; background: rgba(255, 171, 145, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #ffab91;">
+                                    <i data-lucide="info" style="width: 24px;"></i>
+                                </div>
+                                <div>
+                                    <div class="input-label" style="margin-bottom: 0.2rem;">Compliance Level</div>
+                                    <div style="font-size: 1.1rem; font-weight: 600;" id="compliance-text">Pending
+                                        Review</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="result-breakdown" class="glass-panel"
+                        style="padding: 1.5rem; margin-bottom: 3rem; background: rgba(0,0,0,0.3);">
+                        <!-- Detailed breakdown rows inserted by JS -->
+                    </div>
+
+                    <div
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 600px; margin: 0 auto;">
+                        <button type="button" class="btn-primary" id="btn-download-pdf"
+                            style="display: flex; align-items: center; justify-content: center; gap: 0.7rem;">
+                            <i data-lucide="file-check"></i> Download Official Certificate
+                        </button>
+                        <button type="button" class="btn-secondary" id="btn-export-xml"
+                            style="display: flex; align-items: center; justify-content: center; gap: 0.7rem;">
+                            <i data-lucide="share-2"></i> Export CBAM XML
+                        </button>
+                    </div>
+
+                    <p style="text-align: center; margin-top: 2.5rem; font-size: 0.9rem;">
+                        <a href="calculator.html"
+                            style="color: var(--clr-primary); text-decoration: none; font-weight: 600;">Restart
+                            Calculation <i data-lucide="rotate-cw"
+                                style="width: 14px; vertical-align: middle; margin-left: 4px;"></i></a>
+                    </p>
+                </div>
+
+            </form>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <footer class="premium-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="assets/logo.png" alt="CarbonCount" style="height: 35px;">
+                    <p>The enterprise-grade compliance platform for CBAM reporting and industrial decarbonization.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="calculator.html">Calculator</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="about.html">Methodology</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Status</a></li>
+                        <li><a href="#">CBAM Guide</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="contact.html">Support</a></li>
+                        <li><a href="#">Sales</a></li>
+                        <li><a href="#">LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 CarbonCount. All rights reserved.</p>
+                <div style="display: flex; gap: 2rem;">
+                    <a href="#" style="color: inherit; text-decoration: none;">Privacy Policy</a>
+                    <a href="#" style="color: inherit; text-decoration: none;">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK (Modular) -->
+    <script type="module" src="scripts/firebase-config.js"></script>
+    <script type="module" src="scripts/user-profile-manager.js"></script>
+
+    <script src="scripts/mobile.js"></script>
+    <script src="scripts/calculator.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

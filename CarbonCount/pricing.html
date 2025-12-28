@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing | CarbonCount™</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <link rel="stylesheet" href="styles/main.css">
+
+    <style>
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto 4rem;
+        }
+
+        .pricing-card {
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: rgba(255, 255, 255, 0.02);
+            transition: var(--transition);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--clr-primary);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .pricing-card.popular {
+            border: 2px solid var(--clr-primary);
+            box-shadow: 0 0 20px rgba(0, 255, 163, 0.2);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--clr-primary);
+            color: #000;
+            padding: 0.25rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 1.5rem 0 0.5rem;
+            font-family: var(--font-heading);
+            transition: all 0.3s ease;
+        }
+
+        .billing-cycle {
+            font-size: 0.9rem;
+            color: var(--clr-text-muted);
+            margin-bottom: 2rem;
+            height: 1.2rem;
+        }
+
+        .price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--clr-text-muted);
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 0 0 2rem 0;
+            flex: 1;
+        }
+
+        .feature-list li {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--clr-text-muted);
+        }
+
+        .check-icon {
+            color: var(--clr-primary);
+            width: 18px;
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 4rem;
+        }
+
+        .switch {
+            width: 50px;
+            height: 26px;
+            background: #334155;
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .switch.active {
+            background: var(--clr-primary);
+        }
+
+        .switch.active::after {
+            left: 27px;
+        }
+
+        .save-badge {
+            background: var(--clr-accent);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s;
+        }
+
+        .save-badge.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Enterprise Card */
+        .enterprise-card {
+            max-width: 1200px;
+            margin: 0 auto;
+            border: 2px solid #fbbf24;
+            /* Gold */
+            background: linear-gradient(145deg, rgba(251, 191, 36, 0.05), rgba(0, 0, 0, 0));
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 3rem;
+        }
+    </style>
+</head>
+
+<body style="padding-top: 80px;">
+
+    <nav class="glass-nav"
+        style="position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; backdrop-filter: blur(12px); background: rgba(10, 10, 10, 0.6); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+        <div class="nav-container"
+            style="max-width: 1400px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div class="logo" onclick="location.href='index.html'"
+                style="cursor: pointer; display: flex; align-items: center; gap: 0.8rem; font-family: var(--font-heading); font-size: 1.5rem; letter-spacing: 1px; font-weight: 700; color: white;">
+                <img src="assets/logo.png" alt="CarbonCount" style="height: 32px; width: auto;">
+                CarbonCount
+            </div>
+            <div class="nav-links" style="display: flex; gap: 30px; align-items: center;">
+                <a href="index.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">Home</a>
+                <a href="calculator.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">Calculator</a>
+                <a href="pricing.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">Pricing</a>
+                <a href="about.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">About</a>
+                <a href="contact.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">Contact</a>
+            </div>
+            <div class="nav-cta" style="display: flex; gap: 1rem; align-items: center;">
+                <button class="btn-primary" onclick="location.href='login.html'"
+                    style="border-radius: 50px; padding: 0.6rem 1.5rem; font-size: 0.9rem;">Get Started</button>
+            </div>
+            <!-- Hamburger Icon -->
+            <button class="hamburger-btn" onclick="toggleMobileMenu()">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-overlay" class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
+    <!-- Mobile Slide-out Menu -->
+    <div id="mobile-menu" class="mobile-menu">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <span style="font-weight: 700; font-size: 1.2rem;">Menu</span>
+            <i data-lucide="x" onclick="toggleMobileMenu()" style="cursor: pointer;"></i>
+        </div>
+        <a href="index.html">Home</a>
+        <a href="calculator.html">Calculator</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <button class="btn-primary" onclick="location.href='login.html'" style="margin-top: auto; width: 100%;">Get
+            Started</button>
+    </div>
+
+    <main style="padding: 6rem 2rem; text-align: center;">
+
+        <h1 style="font-size: 3.5rem; margin-bottom: 1.5rem;">Simple, Transparent Pricing.</h1>
+        <p style="color: var(--clr-text-muted); font-size: 1.25rem; margin-bottom: 3rem;">Choose the plan that fits your
+            export volume.</p>
+
+        <div class="toggle-container">
+            <span style="font-weight: 500;">Monthly</span>
+            <div id="cycle-toggle" class="switch" onclick="togglePricing()"></div>
+            <span
+                style="font-weight: 500; color: var(--clr-text-muted); display: flex; align-items: center; gap: 0.5rem;">
+                Yearly
+                <span id="save-badge" class="save-badge">SAVE 20%</span>
+            </span>
+        </div>
+
+        <div class="pricing-grid">
+            <!-- Free -->
+            <div class="pricing-card glass-panel" style="border-radius: var(--radius-lg);">
+                <h3 style="color: var(--clr-text-main);">Starter</h3>
+                <div class="price">$0<span>/mo</span></div>
+                <div class="billing-cycle">Forever Free</div>
+                <ul class="feature-list">
+                    <li><i data-lucide="check" class="check-icon"></i> 3 Calculations / Mo</li>
+                    <li><i data-lucide="check" class="check-icon"></i> Basic PDF Report</li>
+                    <li><i data-lucide="x" class="check-icon" style="color: #334155;"></i> No XML Export</li>
+                </ul>
+                <button class="btn-secondary" style="width: 100%;">Start Free</button>
+            </div>
+
+            <!-- Popular -->
+            <div class="pricing-card popular glass-panel" style="border-radius: var(--radius-lg);">
+                <div class="popular-badge">Most Popular</div>
+                <h3 style="color: var(--clr-primary);">Small Exporter</h3>
+                <div class="price" id="price-small">$99<span>/mo</span></div>
+                <div class="billing-cycle" id="bill-small">Billed Monthly</div>
+                <ul class="feature-list">
+                    <li><i data-lucide="check" class="check-icon"></i> Unlimited Calculations</li>
+                    <li><i data-lucide="check" class="check-icon"></i> Advanced Analytics</li>
+                    <li><i data-lucide="check" class="check-icon"></i> Full XML Export</li>
+                    <li><i data-lucide="check" class="check-icon"></i> Email Support</li>
+                </ul>
+                <button class="btn-primary" style="width: 100%;">Get Started</button>
+            </div>
+
+            <!-- Enterprise -->
+            <div class="pricing-card glass-panel" style="border-radius: var(--radius-lg);">
+                <h3 style="color: var(--clr-text-main);">Enterprise</h3>
+                <div class="price" id="price-ent">$149<span>/mo</span></div>
+                <div class="billing-cycle" id="bill-ent">Billed Monthly</div>
+                <ul class="feature-list">
+                    <li><i data-lucide="check" class="check-icon"></i> Multiple Users</li>
+                    <li><i data-lucide="check" class="check-icon"></i> API Access</li>
+                    <li><i data-lucide="check" class="check-icon"></i> Dedicated Manager</li>
+                    <li><i data-lucide="check" class="check-icon"></i> Custom Integrations</li>
+                </ul>
+                <button class="btn-secondary" style="width: 100%;">Contact Sales</button>
+            </div>
+        </div>
+
+        <!-- Custom / Enterprise Section -->
+        <div class="enterprise-card glass-panel">
+            <div style="text-align: left;">
+                <h2 style="font-size: 2rem; margin-bottom: 0.5rem; color: #fbbf24;">Need Custom Integration or API
+                    Access?</h2>
+                <p style="color: var(--clr-text-muted); max-width: 600px;">
+                    For large-scale logistics operations and dedicated support requirements. We offer bespoke solutions
+                    to integrate CBAM reporting directly into your ERP.
+                </p>
+            </div>
+            <button class="btn-secondary" style="border-color: #fbbf24; color: #fbbf24;">Contact Sales</button>
+        </div>
+
+    </main>
+
+    <!-- Hero Canvas -->
+    <div id="hero-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;"></div>
+
+    <footer class="premium-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="assets/logo.png" alt="CarbonCount" style="height: 35px;">
+                    <p>The enterprise-grade compliance platform for CBAM reporting and industrial decarbonization.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="calculator.html">Calculator</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="about.html">Methodology</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Status</a></li>
+                        <li><a href="#">CBAM Guide</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="contact.html">Support</a></li>
+                        <li><a href="#">Sales</a></li>
+                        <li><a href="#">LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 CarbonCount. All rights reserved.</p>
+                <div style="display: flex; gap: 2rem;">
+                    <a href="#" style="color: inherit; text-decoration: none;">Privacy Policy</a>
+                    <a href="#" style="color: inherit; text-decoration: none;">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="scripts/hero-animation.js"></script>
+    <script>
+        lucide.createIcons();
+
+        let isYearly = false;
+
+        function togglePricing() {
+            isYearly = !isYearly;
+
+            // Toggle UI
+            const toggle = document.getElementById('cycle-toggle');
+            const badge = document.getElementById('save-badge');
+
+            if (isYearly) {
+                toggle.classList.add('active');
+                badge.classList.add('visible');
+
+                // Update Prices (Math: ~20% off)
+                updatePrice('price-small', 'bill-small', 79, 948);
+                updatePrice('price-ent', 'bill-ent', 119, 1428);
+
+            } else {
+                toggle.classList.remove('active');
+                badge.classList.remove('visible');
+
+                // Reset Prices
+                updatePrice('price-small', 'bill-small', 99, null);
+                updatePrice('price-ent', 'bill-ent', 149, null);
+            }
+        }
+
+        function updatePrice(priceId, billId, amount, yearlyTotal) {
+            const priceEl = document.getElementById(priceId);
+            const billEl = document.getElementById(billId);
+
+            // Fade Out
+            priceEl.style.opacity = 0;
+
+            setTimeout(() => {
+                priceEl.innerHTML = `$${amount}<span>/mo</span>`;
+                if (yearlyTotal) {
+                    billEl.innerText = `Billed $${yearlyTotal} yearly`;
+                } else {
+                    billEl.innerText = 'Billed Monthly';
+                }
+                // Fade In
+                priceEl.style.opacity = 1;
+            }, 300);
+        }
+    </script>
+    <script src="scripts/mobile.js"></script>
+</body>
+
+</html>

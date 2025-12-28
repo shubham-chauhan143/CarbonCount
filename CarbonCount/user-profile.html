@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile | CarbonCount™</title>
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles/main.css">
+
+    <style>
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #334155;
+            border: 3px solid var(--clr-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 0 20px rgba(0, 255, 163, 0.3);
+        }
+
+        .badge {
+            background: rgba(0, 255, 163, 0.1);
+            color: var(--clr-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid var(--clr-primary-glow);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .input-dark {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--clr-border);
+            border-radius: var(--radius-md);
+            color: white;
+            margin-bottom: 1rem;
+            font-family: var(--font-main);
+        }
+
+        .input-dark:focus {
+            outline: none;
+            border-color: var(--clr-primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: var(--clr-text-muted);
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--clr-border);
+            color: var(--clr-text-main);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--clr-border);
+            color: var(--clr-text-main);
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            border-color: var(--clr-primary);
+            color: var(--clr-primary);
+        }
+    </style>
+</head>
+
+<body style="padding-top: 80px;">
+
+    <!-- Standardized Fixed Navbar -->
+    <nav class="glass-nav"
+        style="position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; backdrop-filter: blur(12px); background: rgba(10, 10, 10, 0.6); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+        <div class="nav-container"
+            style="max-width: 1400px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div class="logo" onclick="location.href='index.html'"
+                style="cursor: pointer; display: flex; align-items: center; gap: 0.8rem; font-family: var(--font-heading); font-size: 1.5rem; letter-spacing: 1px; font-weight: 700; color: white;">
+                <img src="assets/logo.png" alt="CarbonCount" style="height: 32px; width: auto;">
+                CarbonCount
+            </div>
+            <div class="nav-links" style="display: flex; gap: 30px; align-items: center;">
+                <a href="index.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">Home</a>
+                <a href="calculator.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">Calculator</a>
+                <a href="pricing.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">Pricing</a>
+                <a href="about.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">About</a>
+                <a href="contact.html"
+                    style="text-decoration: none; color: var(--clr-text-muted); font-weight: 500; transition: color 0.3s; font-family: var(--font-main);">Contact</a>
+            </div>
+            <div class="nav-cta" style="display: flex; gap: 1rem; align-items: center;">
+                <div class="nav-avatar"
+                    style="width: 40px; height: 40px; background: var(--clr-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: black; cursor: pointer; position: relative;"
+                    title="Logged In">
+                    CS
+                </div>
+            </div>
+            <!-- Hamburger Icon -->
+            <button class="hamburger-btn" onclick="toggleMobileMenu()">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-overlay" class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
+    <!-- Mobile Slide-out Menu -->
+    <div id="mobile-menu" class="mobile-menu">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <span style="font-weight: 700; font-size: 1.2rem;">Menu</span>
+            <i data-lucide="x" onclick="toggleMobileMenu()" style="cursor: pointer;"></i>
+        </div>
+        <a href="index.html">Home</a>
+        <a href="calculator.html">Calculator</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <button class="btn-primary" onclick="location.href='login.html'" style="margin-top: auto; width: 100%;">Get
+            Started</button>
+    </div>
+
+    <!-- Hero Canvas -->
+    <div id="hero-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;"></div>
+
+    <main style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+
+        <!-- Hero Stats Row (Moved to Top) -->
+        <div class="stats-grid"
+            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+            <!-- Card 1 -->
+            <div class="glass-panel" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                <div
+                    style="width: 50px; height: 50px; background: rgba(0, 255, 163, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--clr-primary);">
+                    <i data-lucide="activity"></i>
+                </div>
+                <div>
+                    <h4 style="font-size: 2rem; line-height: 1; color: var(--clr-primary);">45</h4>
+                    <p style="color: var(--clr-text-muted); font-size: 0.9rem;">Total Calculations</p>
+                </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="glass-panel" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                <div
+                    style="width: 50px; height: 50px; background: rgba(0, 210, 255, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--clr-accent);">
+                    <i data-lucide="file-check"></i>
+                </div>
+                <div>
+                    <h4 style="font-size: 2rem; line-height: 1; color: var(--clr-accent);">12</h4>
+                    <p style="color: var(--clr-text-muted); font-size: 0.9rem;">Reports Generated</p>
+                </div>
+            </div>
+            <!-- Card 3 (New) -->
+            <div class="glass-panel" style="padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                <div
+                    style="width: 50px; height: 50px; background: rgba(255, 215, 0, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #ffd700;">
+                    <i data-lucide="dollar-sign"></i>
+                </div>
+                <div>
+                    <h4 style="font-size: 2rem; line-height: 1; color: #ffd700;">$14.2k</h4>
+                    <p style="color: var(--clr-text-muted); font-size: 0.9rem;">Total Tax Saved</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid" style="display: grid; grid-template-columns: 3fr 7fr; gap: 2rem;">
+
+            <!-- Left Column: Profile Card -->
+            <div class="glass-panel" style="padding: 2rem; text-align: center; height: fit-content;">
+                <div class="avatar-large" style="margin: 0 auto 1rem; width: 120px; height: 120px; font-size: 3rem;">CS
+                </div>
+                <h2 style="margin-bottom: 0.5rem;">Chauhan Shubham</h2>
+                <p style="color: var(--clr-text-muted); font-size: 0.9rem; margin-bottom: 2rem;">Engineering Lead •
+                    Global Logistics</p>
+
+                <div
+                    style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 2rem;">
+                    <p
+                        style="font-size: 0.8rem; color: var(--clr-text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">
+                        Current Plan</p>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <span class="badge">Small Exporter</span>
+                        <a href="pricing.html" style="color: var(--clr-accent); font-size: 0.8rem;"><i
+                                data-lucide="external-link" style="width: 14px;"></i></a>
+                    </div>
+                </div>
+
+                <button class="btn-secondary" style="width: 100%; font-size: 0.9rem;">Edit Profile</button>
+            </div>
+
+            <!-- Right Column: Tabbed Content -->
+            <div class="glass-panel" style="overflow: hidden; min-height: 500px;">
+                <!-- Tab Headers -->
+                <div style="display: flex; border-bottom: 1px solid var(--clr-border);">
+                    <button class="tab-btn active" onclick="switchTab('reports')"
+                        style="flex: 1; padding: 1rem; background: transparent; border: none; color: white; border-bottom: 2px solid var(--clr-primary); cursor: pointer; font-weight: 600;">Recent
+                        Reports</button>
+                    <button class="tab-btn" onclick="switchTab('settings')"
+                        style="flex: 1; padding: 1rem; background: transparent; border: none; color: var(--clr-text-muted); border-bottom: 2px solid transparent; cursor: pointer;">Company
+                        Settings</button>
+                    <button class="tab-btn" onclick="switchTab('billing')"
+                        style="flex: 1; padding: 1rem; background: transparent; border: none; color: var(--clr-text-muted); border-bottom: 2px solid transparent; cursor: pointer;">Billing</button>
+                </div>
+
+                <!-- Tab 1: Recent Reports (Active) -->
+                <div id="tab-reports" class="tab-content" style="padding: 2rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1.2rem;">Activity History</h3>
+                        <button class="action-btn" style="font-size: 0.8rem;">Filter <i data-lucide="filter"
+                                style="width: 12px;"></i></button>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr
+                                style="border-bottom: 1px solid var(--clr-border); text-align: left; color: var(--clr-text-muted); font-size: 0.9rem;">
+                                <th style="padding: 1rem;">ID</th>
+                                <th style="padding: 1rem;">Date</th>
+                                <th style="padding: 1rem;">Amount</th>
+                                <th style="padding: 1rem;">Total CO2e</th>
+                                <th style="padding: 1rem; text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.3s;"
+                                onmouseenter="this.style.background='rgba(255,255,255,0.02)'"
+                                onmouseleave="this.style.background='transparent'">
+                                <td style="padding: 1rem; color: var(--clr-accent);">#CC-892</td>
+                                <td style="padding: 1rem;">Dec 20</td>
+                                <td style="padding: 1rem;">450 Tonnes</td>
+                                <td style="padding: 1rem; color: white; font-weight: 600;">1,240.50</td>
+                                <td style="padding: 1rem; text-align: right;">
+                                    <button
+                                        style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--clr-border); background: transparent; color: white; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;"><i
+                                            data-lucide="download" style="width: 14px;"></i></button>
+                                </td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.3s;"
+                                onmouseenter="this.style.background='rgba(255,255,255,0.02)'"
+                                onmouseleave="this.style.background='transparent'">
+                                <td style="padding: 1rem; color: var(--clr-accent);">#CC-845</td>
+                                <td style="padding: 1rem;">Dec 18</td>
+                                <td style="padding: 1rem;">120 Tonnes</td>
+                                <td style="padding: 1rem; color: white; font-weight: 600;">850.20</td>
+                                <td style="padding: 1rem; text-align: right;">
+                                    <button
+                                        style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--clr-border); background: transparent; color: white; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;"><i
+                                            data-lucide="download" style="width: 14px;"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tab 2: Settings -->
+                <div id="tab-settings" class="tab-content" style="padding: 2rem; display: none;">
+                    <h3 style="margin-bottom: 1.5rem;">Default Configuration</h3>
+                    <div style="max-width: 400px;">
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--clr-text-muted);">Company
+                            Legal Name</label>
+                        <input type="text" id="profile-name" class="input-dark" value="Global Logistics Solutions Ltd.">
+
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--clr-text-muted);">Tax ID /
+                            EORI / GSTIN</label>
+                        <input type="text" id="profile-id" class="input-dark" value="DE123456789">
+
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--clr-text-muted);">Default
+                            Country of Origin</label>
+                        <select id="profile-country" class="input-dark" style="cursor: pointer;">
+                            <option value="India">India</option>
+                            <option value="China">China</option>
+                            <option value="Germany">Germany</option>
+                            <option value="USA">USA</option>
+                            <option value="UK">UK</option>
+                        </select>
+
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--clr-text-muted);">Default
+                            Role</label>
+                        <select id="profile-role" class="input-dark" style="cursor: pointer;">
+                            <option value="exporter">Exporter</option>
+                            <option value="manufacturer">Manufacturer</option>
+                            <option value="importer">Importer</option>
+                        </select>
+                        <button id="btn-save-profile" class="btn-primary" style="margin-top: 1rem;">Save
+                            Changes</button>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Billing -->
+                <div id="tab-billing" class="tab-content"
+                    style="padding: 2rem; display: none; text-align: center; padding-top: 4rem;">
+                    <div
+                        style="width: 60px; height: 60px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: var(--clr-text-muted);">
+                        <i data-lucide="receipt"></i>
+                    </div>
+                    <h3>No Active Invoices</h3>
+                    <p style="color: var(--clr-text-muted);">Your billing history will appear here.</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="premium-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="assets/logo.png" alt="CarbonCount" style="height: 35px;">
+                    <p>The enterprise-grade compliance platform for CBAM reporting and industrial decarbonization.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="calculator.html">Calculator</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="about.html">Methodology</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Status</a></li>
+                        <li><a href="#">CBAM Guide</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="contact.html">Support</a></li>
+                        <li><a href="#">Sales</a></li>
+                        <li><a href="#">LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 CarbonCount. All rights reserved.</p>
+                <div style="display: flex; gap: 2rem;">
+                    <a href="#" style="color: inherit; text-decoration: none;">Privacy Policy</a>
+                    <a href="#" style="color: inherit; text-decoration: none;">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="scripts/main.js"></script>
+    <script src="scripts/hero-animation.js"></script>
+    <script src="scripts/user-profile.js"></script>
+    <script>
+        lucide.createIcons();
+
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            // Remove active class
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active');
+                el.style.color = '#94a3b8';
+                el.style.borderColor = 'transparent';
+            });
+
+            // Show selected
+            document.getElementById(`tab-${tabId}`).style.display = 'block';
+
+            // Highlight button
+            const btn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
+            btn.classList.add('active');
+            btn.style.color = 'white';
+            btn.style.borderColor = '#00ffa3';
+        }
+
+        function logout() {
+            localStorage.setItem('isLoggedIn', 'false');
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <script src="scripts/mobile.js"></script>
+</body>
+
+</html>
